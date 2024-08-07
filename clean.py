@@ -1,12 +1,12 @@
 import os
 import shutil
 
-prefix = r'X:\ML\watermelon_eval'
+prefix = r'/Users/lilingfeng/Repositories/watermelon'
 
 # 原始数据集路径
-original_dataset_path = prefix + r'\datasets'
+original_dataset_path = prefix + r'/datasets'
 # 预处理后的数据集路径
-cleaned_dataset_path = prefix + r'\cleaned'
+cleaned_dataset_path = prefix + r'/cleaned'
 
 # 创建预处理后的数据集路径
 os.makedirs(cleaned_dataset_path, exist_ok=True)
@@ -27,12 +27,12 @@ for subdir in subdirs:
         os.path.join(original_dataset_path, subdir, 'chu', f))]
 
     for folder in folders:
-        # copy, rename wav and jpg files
+        # move, rename wav and jpg files
         currPath = os.path.join(original_dataset_path, subdir, 'chu', folder)
         # create destination folder
         destPath = os.path.join(cleaned_dataset_path, sweetness, str(global_counter))
         os.makedirs(destPath, exist_ok=True)
-        shutil.copy(os.path.join(currPath, [f for f in os.listdir(currPath) if f.endswith('.wav')][0]), os.path.join(destPath, str(global_counter) + '.wav'))
-        shutil.copy(os.path.join(currPath, [f for f in os.listdir(currPath) if f.endswith('.jpg')][0]), os.path.join(destPath, str(global_counter) + '.jpg'))
+        shutil.move(os.path.join(currPath, [f for f in os.listdir(currPath) if f.endswith('.wav')][0]), os.path.join(destPath, str(global_counter) + '.wav'))
+        shutil.move(os.path.join(currPath, [f for f in os.listdir(currPath) if f.endswith('.jpg')][0]), os.path.join(destPath, str(global_counter) + '.jpg'))
         
         global_counter += 1
