@@ -1,0 +1,173 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      6503,        165]
+NotebookOptionsPosition[      5568,        140]
+NotebookOutlinePosition[      6022,        158]
+CellTagsIndexPosition[      5979,        155]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{"preprocessedPath", " ", "=", " ", 
+  "\"\<X:\\\\ML\\\\watermelon_eval\\\\preprocessed\\\\\>\""}]], "Input",
+ CellChangeTimes->{{3.931934396490093*^9, 3.9319344498307495`*^9}, {
+  3.9319380574464293`*^9, 3.931938062433101*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"b6b34996-7786-4a0f-ac40-f093d5527f7e"],
+
+Cell[BoxData["\<\"X:\\\\ML\\\\watermelon_eval\\\\preprocessed\\\\\"\>"], \
+"Output",
+ CellChangeTimes->{3.931938771590706*^9},
+ CellLabel->"Out[1]=",ExpressionUUID->"659d995a-65a8-4b83-9a98-b86564201a4c"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"sweetness", "=", 
+  RowBox[{
+   RowBox[{"Transpose", "[", 
+    RowBox[{"StringSplit", "[", 
+     RowBox[{
+      RowBox[{"FileNames", "[", 
+       RowBox[{"All", ",", "preprocessedPath"}], "]"}], ",", "\"\<\\\\\>\""}],
+      "]"}], "]"}], "[", 
+   RowBox[{"[", 
+    RowBox[{"-", "1"}], "]"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.931934476683067*^9, 3.931934736255576*^9}},
+ NumberMarks->False,
+ CellLabel->"In[2]:=",ExpressionUUID->"0308675b-092b-4c10-88b5-c83a5e586d6a"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"10\"\>", ",", "\<\"10.2\"\>", ",", "\<\"10.3\"\>", 
+   ",", "\<\"10.4\"\>", ",", "\<\"10.5\"\>", ",", "\<\"10.8\"\>", 
+   ",", "\<\"10.9\"\>", ",", "\<\"11\"\>", ",", "\<\"11.1\"\>", 
+   ",", "\<\"11.6\"\>", ",", "\<\"12.7\"\>", ",", "\<\"8.7\"\>", 
+   ",", "\<\"9\"\>", ",", "\<\"9.4\"\>", ",", "\<\"9.6\"\>", 
+   ",", "\<\"9.7\"\>"}], "}"}]], "Output",
+ CellChangeTimes->{3.9319387729775443`*^9},
+ CellLabel->"Out[2]=",ExpressionUUID->"a337a07b-38ae-433b-bd86-a4f2eb021f42"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"data", " ", "=", " ", 
+  RowBox[{"{", "}"}]}]], "Input",
+ CellChangeTimes->{{3.9319347785399437`*^9, 3.9319348161989126`*^9}},
+ CellLabel->"In[20]:=",ExpressionUUID->"1bcb9d1a-2c5d-4fe8-850d-478405d61984"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{"\:6784\:5efa\:6570\:636e\:96c6", "\:ff1a", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"{", 
+       RowBox[{"sweetness", ",", " ", "audio", ",", " ", "image"}], "}"}], 
+      "}"}], " ", "\:7136\:540e\:8f6c\:7f6e"}], "\:ff0c", 
+    RowBox[{
+    "\:5bf9", " ", "audio", " ", "\:548c", " ", "image", " ", 
+     "\:5206\:522b\:8fdb\:884c\:7279\:5f81\:63d0\:53d6"}], "\:3002"}], " ", 
+   "*)"}], "\[IndentingNewLine]", 
+  RowBox[{"Do", "[", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"folderPath", " ", "=", " ", 
+      RowBox[{"StringJoin", "[", 
+       RowBox[{"preprocessedPath", ",", 
+        RowBox[{"ToString", "[", 
+         RowBox[{"sweetness", "[", 
+          RowBox[{"[", "i", "]"}], "]"}], "]"}]}], "]"}]}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"dataFolders", " ", "=", " ", 
+      RowBox[{"FileNames", "[", 
+       RowBox[{"All", ",", "folderPath"}], "]"}]}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"Do", "[", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"AppendTo", "[", 
+        RowBox[{"data", ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"sweetness", "[", 
+            RowBox[{"[", "i", "]"}], "]"}], ",", 
+           RowBox[{"Import", "[", 
+            RowBox[{"StringJoin", "[", 
+             RowBox[{
+              RowBox[{"dataFolders", "[", 
+               RowBox[{"[", "j", "]"}], "]"}], ",", "\"\<\\\\*.wav\>\""}], 
+             "]"}], "]"}], ",", 
+           RowBox[{"Import", "[", 
+            RowBox[{"StringJoin", "[", 
+             RowBox[{
+              RowBox[{"dataFolders", "[", 
+               RowBox[{"[", "j", "]"}], "]"}], ",", "\"\<\\\\*.jpg\>\""}], 
+             "]"}], "]"}]}], "}"}]}], "]"}], "\[IndentingNewLine]", ",", 
+       RowBox[{"{", 
+        RowBox[{"j", ",", 
+         RowBox[{"Length", "[", "dataFolders", "]"}]}], "}"}]}], "]"}]}], 
+    "\[IndentingNewLine]", ",", 
+    RowBox[{"{", 
+     RowBox[{"i", ",", " ", 
+      RowBox[{"Length", "[", "sweetness", "]"}]}], "}"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.931934820945093*^9, 3.9319348871087112`*^9}, {
+   3.931934934792935*^9, 3.931935034575062*^9}, 3.93193561221957*^9, {
+   3.931936086619996*^9, 3.931936112568824*^9}, {3.93193614696192*^9, 
+   3.931936162270937*^9}, {3.93193620223701*^9, 3.9319363321229763`*^9}, {
+   3.93193637908035*^9, 3.9319366773623123`*^9}, {3.93193672206268*^9, 
+   3.931936735975381*^9}, {3.9319367830945916`*^9, 3.931936885099377*^9}, {
+   3.931937145584489*^9, 3.931937199139273*^9}, {3.93193724855406*^9, 
+   3.9319373897386613`*^9}, {3.9319374217196875`*^9, 3.931937438265977*^9}, {
+   3.931937685031584*^9, 3.9319376941890793`*^9}, {3.9319377561588497`*^9, 
+   3.931937783657932*^9}, {3.9319378855917068`*^9, 3.9319378864390473`*^9}, {
+   3.931938234502225*^9, 3.931938436572941*^9}, {3.9319385761572485`*^9, 
+   3.9319385802213297`*^9}, {3.9319386390000973`*^9, 3.931938728720895*^9}, {
+   3.931938801129718*^9, 3.9319388079748487`*^9}, {3.9319389951988173`*^9, 
+   3.9319390000889378`*^9}},
+ CellLabel->"In[19]:=",ExpressionUUID->"f4aca0b1-f2d2-45da-9973-6fb2b0aed6f4"]
+},
+WindowSize->{569.25, 624.75},
+WindowMargins->{{Automatic, 275.25}, {39.75, Automatic}},
+Magnification:>1. Inherited,
+FrontEndVersion->"13.3 for Microsoft Windows (64-bit) (2023\:5e747\:670824\
+\:65e5)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"203a015f-10ad-4ffb-afe3-76d9c1c37d8d"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 328, 5, 28, "Input",ExpressionUUID->"b6b34996-7786-4a0f-ac40-f093d5527f7e"],
+Cell[911, 29, 204, 3, 32, "Output",ExpressionUUID->"659d995a-65a8-4b83-9a98-b86564201a4c"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1152, 37, 499, 13, 83, "Input",ExpressionUUID->"0308675b-092b-4c10-88b5-c83a5e586d6a"],
+Cell[1654, 52, 520, 9, 52, "Output",ExpressionUUID->"a337a07b-38ae-433b-bd86-a4f2eb021f42"]
+}, Open  ]],
+Cell[2189, 64, 229, 4, 28, "Input",ExpressionUUID->"1bcb9d1a-2c5d-4fe8-850d-478405d61984"],
+Cell[2421, 70, 3143, 68, 399, "Input",ExpressionUUID->"f4aca0b1-f2d2-45da-9973-6fb2b0aed6f4"]
+}
+]
+*)
+
