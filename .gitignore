@@ -167,3 +167,6 @@ cleaned/
 
 # macOS
 .DS_Store
+
+# TensorBoard
+runs/
