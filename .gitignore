@@ -164,6 +164,7 @@ cython_debug/
 
 datasets/
 cleaned/
+processed/
 
 # macOS
 .DS_Store

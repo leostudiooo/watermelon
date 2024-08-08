@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from preprocessing import *
+from preprocess import *
 
 print(f"\033[92mINFO\033[0m: PyTorch version: {torch.__version__}")
 print(f"\033[92mINFO\033[0m: Torchaudio version: {torchaudio.__version__}")
