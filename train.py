@@ -6,8 +6,8 @@
 
 # Model structure:
 # Input: {audio[16 kHz, mono], image[]}
-# Connection: LSTM, ResNet50
-# Output: {sweetness}
+# Prediction: LSTM, ResNet50
+# Output: regression -> sweetness, merge LSTM and ResNet50 predictions
 
 import os
 import glob
