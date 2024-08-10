@@ -31,6 +31,14 @@ Run `clean.py` to clean the original dataset (you may have to modify the path in
 python clean.py
 ```
 
+### Do Preprocessing
+
+To accelerate the training procrss, preprocessing is necessary.
+
+```bash
+python preprocess.py --data_dir /path/to/cleaned
+```
+
 ### Train
 
 Run `train.py` to train the model.
