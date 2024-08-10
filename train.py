@@ -58,10 +58,10 @@ val_size = int(0.2 * n_samples)
 test_size = n_samples - train_size - val_size
 
 # Seaborn classic style to plot dataset statistics
-sns.set_theme()
-sns.histplot([sample[2] for sample in dataset], bins=10)
-plt.title('Sweetness distribution')
-plt.show()
+# sns.set_theme()
+# sns.histplot([sample[2] for sample in dataset], bins=10)
+# plt.title('Sweetness distribution')
+# plt.show()
 
 train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
     dataset, [train_size, val_size, test_size]
@@ -140,11 +140,14 @@ for epoch in range(epochs):
     model.eval()
     val_loss = 0.0
     with torch.no_grad():
-        for mfcc, image, label in val_loader:
-            mfcc, image, label = mfcc.to(device), image.to(device), label.to(device)
-            output = model(mfcc, image)
-            loss = criterion(output, label.view(-1, 1))
-            val_loss += loss.item()
+        try:
+            for mfcc, image, label in val_loader:
+                mfcc, image, label = mfcc.to(device), image.to(device), label.to(device)
+                output = model(mfcc, image)
+                loss = criterion(output, label.view(-1, 1))
+                val_loss += loss.item()
+        except Exception as e:
+            print(f"\033[91mERR!\033[0m: {e}") # WTF?
 
     print(f"Epoch [{epoch+1}/{epochs}], Training Loss: {running_loss/len(train_loader):.4f}, "
           f"Validation Loss: {val_loss/len(val_loader):.4f}")
