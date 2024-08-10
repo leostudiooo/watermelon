@@ -10,7 +10,6 @@
 # Output: regression -> sweetness, merge LSTM and ResNet50 predictions
 
 import os
-import glob
 import torch, torchaudio, torchvision
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -32,7 +31,7 @@ device = torch.device(
 print(f"\033[92mINFO\033[0m: Using device: {device}")
 
 # Hyperparameters
-batch_size = 32
+batch_size = 4
 epochs = 20
 
 class PreprocessedDataset(Dataset):
@@ -53,22 +52,15 @@ class PreprocessedDataset(Dataset):
 data_dir = 'processed/'
 dataset = PreprocessedDataset(data_dir)
 n_samples = len(dataset)
-train_size = int(0.8 * n_samples)
-val_size = int(0.1 * n_samples)
+
+train_size = int(0.7 * n_samples)
+val_size = int(0.2 * n_samples)
 test_size = n_samples - train_size - val_size
 
 # Seaborn classic style to plot dataset statistics
 sns.set_theme()
-
-# Plot dataset statistics
-labels = []
-for idx in range(len(dataset)):
-    _, _, label = dataset[idx]
-    labels.append(label)
-sns.histplot(labels, kde=True)
-plt.title("Dataset Statistics")
-plt.xlabel("Sweetness")
-plt.ylabel("Count")
+sns.histplot([sample[2] for sample in dataset], bins=10)
+plt.title('Sweetness distribution')
 plt.show()
 
 train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
@@ -77,21 +69,43 @@ train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 # Define model
 class WatermelonModel(torch.nn.Module):
     def __init__(self):
         super(WatermelonModel, self).__init__()
+
+        # LSTM for audio features
         self.lstm = torch.nn.LSTM(input_size=13, hidden_size=64, num_layers=2, batch_first=True)
+        self.lstm_fc = torch.nn.Linear(64, 128)  # Convert LSTM output to 128-dim for merging
+
+        # ResNet50 for image features
         self.resnet = torchvision.models.resnet50(pretrained=True)
-        self.resnet.fc = torch.nn.Linear(2048, 1)
+        self.resnet.fc = torch.nn.Linear(self.resnet.fc.in_features, 128)  # Convert ResNet output to 128-dim for merging
+
+        # Fully connected layers for final prediction
+        self.fc1 = torch.nn.Linear(256, 64)
+        self.fc2 = torch.nn.Linear(64, 1)
+        self.relu = torch.nn.ReLU()
 
     def forward(self, mfcc, image):
+        # LSTM branch
         lstm_output, _ = self.lstm(mfcc)
+        lstm_output = lstm_output[:, -1, :]  # Use the output of the last time step
+        lstm_output = self.lstm_fc(lstm_output)
+        
+        # ResNet branch
         resnet_output = self.resnet(image)
-        return lstm_output[:, -1, :], resnet_output
-    
+        
+        # Concatenate LSTM and ResNet outputs
+        merged = torch.cat((lstm_output, resnet_output), dim=1)
+        
+        # Fully connected layers
+        output = self.relu(self.fc1(merged))
+        output = self.fc2(output)
+        
+        return output
+
 model = WatermelonModel().to(device)
 
 # Define loss function and optimizer
@@ -101,3 +115,43 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 # Tensorboard
 writer = SummaryWriter('runs/')
 global_step = 0
+
+# Training loop
+for epoch in range(epochs):
+    model.train()
+    running_loss = 0.0
+    try:
+        for mfcc, image, label in train_loader:
+            mfcc, image, label = mfcc.to(device), image.to(device), label.to(device)
+
+            optimizer.zero_grad()
+            output = model(mfcc, image)
+            loss = criterion(output, label.view(-1, 1))
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item()
+            writer.add_scalar('Training Loss', loss.item(), global_step)
+            global_step += 1
+    except Exception as e:
+        print(f"\033[91mERR!\033[0m: {e}")
+
+    # Validation
+    model.eval()
+    val_loss = 0.0
+    with torch.no_grad():
+        for mfcc, image, label in val_loader:
+            mfcc, image, label = mfcc.to(device), image.to(device), label.to(device)
+            output = model(mfcc, image)
+            loss = criterion(output, label.view(-1, 1))
+            val_loss += loss.item()
+
+    print(f"Epoch [{epoch+1}/{epochs}], Training Loss: {running_loss/len(train_loader):.4f}, "
+          f"Validation Loss: {val_loss/len(val_loader):.4f}")
+
+    # Log validation loss to TensorBoard
+    writer.add_scalar('Validation Loss', val_loss / len(val_loader), epoch)
+
+# Save the trained model
+torch.save(model.state_dict(), 'watermelon_model.pth')
+print(f"\033[92mINFO\033[0m: Model saved to watermelon_model.pth")
