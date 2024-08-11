@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project is based on [crf0409/watermelon_eval](https://github.com/crf0409/watermelon_eval), reimplemented with PyTorch. You can get the original dataset from the link above.
+This project is based on [crf0409/watermelon_eval](https://github.com/crf0409/watermelon_eval), reimplemented with PyTorch under [CC-BY-NC-SA 4.0 License](LICENSE). You can get the original dataset from the link above.
 
 ## File Structure
 
@@ -15,7 +15,7 @@ This project is based on [crf0409/watermelon_eval](https://github.com/crf0409/wa
 
 ### Preparation
 
-Download the dataset from [crf0409/watermelon_eval](https://github.com/crf0409/watermelon_eval), which provides links (on IEEE DataPort and Baidu Netdisk) of the original dataset. Unzip and copy to the repository root (rename the folder to `datasets` is recommended).
+Download the dataset from [crf0409/watermelon_eval](https://github.com/crf0409/watermelon_eval), which provides links to IEEE DataPort and Baidu Netdisk. Unzip and copy to the repository root (rename the folder to `datasets` is recommended).
 
 (Recommended) Create a virtual environment and install the dependencies:
 
