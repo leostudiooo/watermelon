@@ -25,7 +25,7 @@ pip install -r requirements.txt
 
 ### Clean the Dataset
 
-Run `clean.py` to clean the original dataset (you may have to modify the path in the script).
+Run `clean.py` to [clean](clean.py) the original dataset (you may have to modify the path in the script).
 
 ```bash
 python clean.py
@@ -33,7 +33,7 @@ python clean.py
 
 ### Do Preprocessing
 
-To accelerate the training procrss, preprocessing is necessary.
+Run [`preprocess.py`](preprocess.py) to avoid duplicated preprocessing is useful to accelerate training.
 
 ```bash
 python preprocess.py --data_dir /path/to/cleaned
@@ -41,7 +41,7 @@ python preprocess.py --data_dir /path/to/cleaned
 
 ### Train
 
-Run `train.py` to train the model.
+Run [`train.py`](train.py) to train the model.
 
 ```bash
 python train.py
