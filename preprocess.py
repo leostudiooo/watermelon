@@ -8,9 +8,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 sample_rate = 16000
 
-# Check if GPU is available
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 # Data preprocessing
 def audio_preprocessing(audio_path):
@@ -18,7 +15,7 @@ def audio_preprocessing(audio_path):
         audio_path = audio_path[0]
         waveform, sample_rate = torchaudio.load(uri=audio_path, format="wav")
         # Select left channel
-        waveform = waveform[0].to(device)
+        waveform = waveform[0]
         # Resample to 16 kHz
         waveform = torchaudio.transforms.Resample(
             orig_freq=sample_rate, new_freq=sample_rate
@@ -47,7 +44,7 @@ def audio_preprocessing(audio_path):
                 "n_mels": n_mels,
             },
         )(waveform)
-        return mfcc.cpu()  # Move back to CPU if needed
+        return mfcc  # Move back to CPU if needed
     except Exception as e:
         print(f"\033[91mERR!\033[0m: Error in audio preprocessing: {e}")
         return None
