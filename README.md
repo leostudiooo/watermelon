@@ -54,7 +54,7 @@ python preprocess.py --data_dir /path/to/cleaned --save_dir /path/to/processed
 Preprocessing includes:
 
 1. Read the dataset from disk.
-2. Audio: Resample to 16kHz, cut to 3s, and convert to Mel spectrogram.
+2. Audio: Choose left channel, resample to 16 kHz, cut/pad to 3 seconds, and convert to Mel spectrogram.
 3. Image: Resize to 1080x1080, normalize, and prepare for ResNet-50.
 4. Make audio-image-label pairs, then save them to disk.
 

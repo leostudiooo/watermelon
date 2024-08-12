@@ -7,8 +7,12 @@ def audio_preprocessing(audio_path):
     try:
         audio_path = audio_path[0]
         waveform, sample_rate = torchaudio.load(uri=audio_path,format="wav")
+        # Select left channel
+        waveform = waveform[0]
         # Resample to 16 kHz
         waveform = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=16000)(waveform)
+        # Cut/Pad to 3 seconds
+        waveform = torchaudio.transforms.PadTrim(3 * 16000)(waveform)
         # MFCC (Mel-frequency cepstral coefficients)
         # /Users/lilingfeng/Repositories/watermelon/.venv/lib/python3.12/site-packages/torchaudio/functional/functional.py:584: UserWarning: At least one mel filterbank has all zero values. The value for `n_mels` (128) may be set too high. Or, the value for `n_freqs` (201) may be set too low.
         mfcc = torchaudio.transforms.MFCC(sample_rate=16000)(waveform)
