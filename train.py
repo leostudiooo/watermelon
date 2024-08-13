@@ -13,8 +13,8 @@ import os
 import torch, torchaudio, torchvision
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
-import seaborn as sns
-import matplotlib.pyplot as plt
+# import seaborn as sns
+# import matplotlib.pyplot as plt
 
 from preprocess import *
 
@@ -29,6 +29,9 @@ device = torch.device(
     else "cpu"
 )
 print(f"\033[92mINFO\033[0m: Using device: {device}")
+
+# Set torch logging level to debug
+torch.set_printoptions(profile="full")
 
 # Hyperparameters
 batch_size = 4
@@ -65,7 +68,7 @@ test_size = n_samples - train_size - val_size
 
 train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
     dataset, [train_size, val_size, test_size]
-)
+).float()
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
@@ -76,7 +79,7 @@ class WatermelonModel(torch.nn.Module):
         super(WatermelonModel, self).__init__()
 
         # LSTM for audio features
-        self.lstm = torch.nn.LSTM(input_size=13, hidden_size=64, num_layers=2, batch_first=True)
+        self.lstm = torch.nn.LSTM(input_size=376, hidden_size=64, num_layers=2, batch_first=True)
         self.lstm_fc = torch.nn.Linear(64, 128)  # Convert LSTM output to 128-dim for merging
 
         # ResNet50 for image features
@@ -115,6 +118,13 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 # Tensorboard
 writer = SummaryWriter('runs/')
 global_step = 0
+
+# Log everything in terminal
+print(f"\033[92mINFO\033[0m: Training model for {epochs} epochs")
+print(f"\033[92mINFO\033[0m: Training samples: {len(train_dataset)}")
+print(f"\033[92mINFO\033[0m: Validation samples: {len(val_dataset)}")
+print(f"\033[92mINFO\033[0m: Test samples: {len(test_dataset)}")
+print(f"\033[92mINFO\033[0m: Batch size: {batch_size}")
 
 # Training loop
 for epoch in range(epochs):
