@@ -13,8 +13,8 @@ import os
 import torch, torchaudio, torchvision
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
-# import seaborn as sns
-# import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from preprocess import *
 
@@ -48,6 +48,9 @@ class PreprocessedDataset(Dataset):
     def __getitem__(self, idx):
         sample_path = self.samples[idx]
         mfcc, image, label = torch.load(sample_path)
+        # Convert to float32
+        # mfcc = mfcc.float()
+        # image = image.float()
         return mfcc, image, label
 
 # Use DataLoader to load dataset from disk
@@ -61,14 +64,14 @@ val_size = int(0.2 * n_samples)
 test_size = n_samples - train_size - val_size
 
 # Seaborn classic style to plot dataset statistics
-# sns.set_theme()
-# sns.histplot([sample[2] for sample in dataset], bins=10)
-# plt.title('Sweetness distribution')
-# plt.show()
+sns.set_theme()
+sns.histplot([sample[2] for sample in dataset], bins=10)
+plt.title('Sweetness distribution')
+plt.show()
 
 train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
     dataset, [train_size, val_size, test_size]
-).float()
+)
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
@@ -128,6 +131,8 @@ print(f"\033[92mINFO\033[0m: Batch size: {batch_size}")
 
 # Training loop
 for epoch in range(epochs):
+    print(f"\033[92mINFO\033[0m: Training epoch({epoch+1}/{epochs})")
+
     model.train()
     running_loss = 0.0
     try:

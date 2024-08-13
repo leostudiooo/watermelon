@@ -171,3 +171,6 @@ processed/
 
 # TensorBoard
 runs/
+
+# Model
+*.pth
