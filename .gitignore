@@ -175,3 +175,6 @@ runs/
 # Model
 *.pth
 models/
+
+# VS Code
+.vscode/
