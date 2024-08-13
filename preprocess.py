@@ -48,7 +48,7 @@ def audio_preprocessing(audio_path):
         # Print MFCC shape
         print(f"\033[0mDBG.\033[0m: MFCC shape: {mfcc.shape}")
 
-        return mfcc  # Move back to CPU if needed
+        return mfcc
     except Exception as e:
         print(f"\033[91mERR!\033[0m: Error in audio preprocessing: {e}")
         return None
