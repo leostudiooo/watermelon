@@ -209,6 +209,6 @@ for epoch in range(epochs):
     model_path = f"models/model_{epoch+1}_{timestamp}.pt"
     torch.save(model.state_dict(), model_path)
 
-    print(f"\033[92mINFO\033[0m: Model checkpoint epoch [{epoch}/{epochs}] saved: {model_path}")
+    print(f"\033[92mINFO\033[0m: Model checkpoint epoch [{epoch+1}/{epochs}] saved: {model_path}")
 
 print(f"\033[92mINFO\033[0m: Training complete")
