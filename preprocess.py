@@ -6,7 +6,7 @@ import torchvision
 from torch.utils.data import Dataset
 from concurrent.futures import ThreadPoolExecutor
 
-sample_rate = 16000
+resample_rate = 16000
 
 
 # Data preprocessing
@@ -18,24 +18,24 @@ def audio_preprocessing(audio_path):
         waveform = waveform[0]
         # Resample to 16 kHz
         waveform = torchaudio.transforms.Resample(
-            orig_freq=sample_rate, new_freq=sample_rate
+            orig_freq=sample_rate, new_freq=resample_rate
         )(waveform)
         # or if shorter than 3 seconds, pad to 3 seconds
-        if waveform.size(0) < 3 * sample_rate:
+        if waveform.size(0) < 3 * resample_rate:
             waveform = torch.nn.functional.pad(
-                waveform, (0, 3 * sample_rate - waveform.size(0))
+                waveform, (0, 3 * resample_rate - waveform.size(0))
             )
         else:
-            waveform = waveform[: 3 * sample_rate]
+            waveform = waveform[: 3 * resample_rate]
 
         # Parameters for MFCC
         n_fft = 256
-        window_length = int(0.2 * sample_rate)  # 100ms window
+        window_length = 256
         n_mels = 40  # You can adjust this value as needed
 
         # MFCC (Mel-frequency cepstral coefficients)
         mfcc = torchaudio.transforms.MFCC(
-            sample_rate=sample_rate,
+            sample_rate=resample_rate,
             n_mfcc=13,  # Number of MFCC coefficients
             melkwargs={
                 "n_fft": n_fft,
@@ -44,6 +44,10 @@ def audio_preprocessing(audio_path):
                 "n_mels": n_mels,
             },
         )(waveform)
+
+        # Print MFCC shape
+        print(f"\033[0mDBG.\033[0m: MFCC shape: {mfcc.shape}")
+
         return mfcc  # Move back to CPU if needed
     except Exception as e:
         print(f"\033[91mERR!\033[0m: Error in audio preprocessing: {e}")
