@@ -1,14 +1,3 @@
-# cleaned data structure:
-# /path/to/cleaned/{sweetness(tag)}/{id}/{id}.{wav, jpg}
-
-# Dataset structure:
-# {{processed audio data, processed image data, sweetness}}
-
-# Model structure:
-# Input: {audio[16 kHz, mono], image[]}
-# Prediction: LSTM, ResNet50
-# Output: regression -> sweetness, merge LSTM and ResNet50 predictions
-
 import os
 import time
 
@@ -16,16 +5,14 @@ import torch, torchaudio, torchvision
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-import seaborn as sns
-import matplotlib.pyplot as plt
+from preprocess import image_preprocessing, audio_preprocessing
 
-from preprocess import *
-
+# 打印库的版本信息
 print(f"\033[92mINFO\033[0m: PyTorch version: {torch.__version__}")
 print(f"\033[92mINFO\033[0m: Torchaudio version: {torchaudio.__version__}")
 print(f"\033[92mINFO\033[0m: Torchvision version: {torchvision.__version__}")
 
-# Check available devices
+# 设备选择
 device = torch.device(
     "cuda"
     if torch.cuda.is_available()
@@ -33,16 +20,13 @@ device = torch.device(
 )
 print(f"\033[92mINFO\033[0m: Using device: {device}")
 
-# Set torch logging level to debug
-torch.set_printoptions(profile="full")
-
-# Hyperparameters
+# 超参数设置
 batch_size = 4
 epochs = 20
 
-
-# Saving path
+# 模型保存目录
 os.makedirs("models/", exist_ok=True)
+
 
 class PreprocessedDataset(Dataset):
     def __init__(self, data_dir):
@@ -57,43 +41,9 @@ class PreprocessedDataset(Dataset):
     def __getitem__(self, idx):
         sample_path = self.samples[idx]
         mfcc, image, label = torch.load(sample_path)
-        # Convert to float32
-        mfcc = mfcc.float()
-        image = image.float()
-
-        # Debugging
-        # Print shapes and types
-        # print(f"MFCC shape: {mfcc.shape}, type: {mfcc.dtype}")
-        # print(f"Image shape: {image.shape}, type: {image.dtype}")
-
-        return mfcc, image, label
+        return mfcc.float(), image.float(), label
 
 
-# Use DataLoader to load dataset from disk
-# And split into train/val/test
-data_dir = "processed/"
-dataset = PreprocessedDataset(data_dir)
-n_samples = len(dataset)
-
-train_size = int(0.7 * n_samples)
-val_size = int(0.2 * n_samples)
-test_size = n_samples - train_size - val_size
-
-# Seaborn classic style to plot dataset statistics
-# sns.set_theme()
-# sns.histplot([sample[2] for sample in dataset], bins=10)
-# plt.title("Sweetness distribution")
-# plt.show()
-
-train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
-    dataset, [train_size, val_size, test_size]
-)
-
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-
-
-# Define model
 class WatermelonModel(torch.nn.Module):
     def __init__(self):
         super(WatermelonModel, self).__init__()
@@ -118,7 +68,6 @@ class WatermelonModel(torch.nn.Module):
         self.relu = torch.nn.ReLU()
 
     def forward(self, mfcc, image):
-
         # LSTM branch
         lstm_output, _ = self.lstm(mfcc)
         lstm_output = lstm_output[:, -1, :]  # Use the output of the last time step
@@ -130,85 +79,105 @@ class WatermelonModel(torch.nn.Module):
         # Concatenate LSTM and ResNet outputs
         merged = torch.cat((lstm_output, resnet_output), dim=1)
 
-        # Debugging
-        # print(f"Merged shape: {merged.shape}, type: {merged.dtype}")
-
         # Fully connected layers
         output = self.relu(self.fc1(merged))
         output = self.fc2(output)
 
-        # Debugging
-        # print(f"Output shape: {output.shape}, type: {output.dtype}")
-
         return output
 
 
-model = WatermelonModel().to(device)
+def train_model():
+    # 数据集加载
+    data_dir = "processed/"
+    dataset = PreprocessedDataset(data_dir)
+    n_samples = len(dataset)
 
-# Define loss function and optimizer
-criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    train_size = int(0.7 * n_samples)
+    val_size = int(0.2 * n_samples)
+    test_size = n_samples - train_size - val_size
 
-# Tensorboard
-writer = SummaryWriter("runs/")
-global_step = 0
-
-# Log everything in terminal
-print(f"\033[92mINFO\033[0m: Training model for {epochs} epochs")
-print(f"\033[92mINFO\033[0m: Training samples: {len(train_dataset)}")
-print(f"\033[92mINFO\033[0m: Validation samples: {len(val_dataset)}")
-print(f"\033[92mINFO\033[0m: Test samples: {len(test_dataset)}")
-print(f"\033[92mINFO\033[0m: Batch size: {batch_size}")
-
-# Training loop
-for epoch in range(epochs):
-    print(f"\033[92mINFO\033[0m: Training epoch({epoch+1}/{epochs})")
-
-    model.train()
-    running_loss = 0.0
-    try:
-        for mfcc, image, label in train_loader:
-            mfcc, image, label = mfcc.to(device), image.to(device), label.to(device)
-
-            optimizer.zero_grad()
-            output = model(mfcc, image)
-            label = label.view(-1, 1).float()
-            loss = criterion(output, label)
-            loss.backward()
-            optimizer.step()
-
-            running_loss += loss.item()
-            writer.add_scalar("Training Loss", loss.item(), global_step)
-            global_step += 1
-    except Exception as e:
-        print(f"\033[91mERR!\033[0m: {e}")
-
-    # Validation
-    model.eval()
-    val_loss = 0.0
-    with torch.no_grad():
-        try:
-            for mfcc, image, label in val_loader:
-                mfcc, image, label = mfcc.to(device), image.to(device), label.to(device)
-                output = model(mfcc, image)
-                loss = criterion(output, label.view(-1, 1))
-                val_loss += loss.item()
-        except Exception as e:
-            print(f"\033[91mERR!\033[0m: {e}")  # WTF?
-
-    # Log validation loss to TensorBoard
-    writer.add_scalar("Validation Loss", val_loss / len(val_loader), epoch)
-
-    print(
-        f"Epoch [{epoch+1}/{epochs}], Training Loss: {running_loss/len(train_loader):.4f}, "
-        f"Validation Loss: {val_loss/len(val_loader):.4f}"
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
+        dataset, [train_size, val_size, test_size]
     )
 
-    # Save model checkpoint
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
-    model_path = f"models/model_{epoch+1}_{timestamp}.pt"
-    torch.save(model.state_dict(), model_path)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-    print(f"\033[92mINFO\033[0m: Model checkpoint epoch [{epoch+1}/{epochs}] saved: {model_path}")
+    model = WatermelonModel().to(device)
 
-print(f"\033[92mINFO\033[0m: Training complete")
+    # 损失函数和优化器
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+    # TensorBoard
+    writer = SummaryWriter("runs/")
+    global_step = 0
+
+    print(f"\033[92mINFO\033[0m: Training model for {epochs} epochs")
+    print(f"\033[92mINFO\033[0m: Training samples: {len(train_dataset)}")
+    print(f"\033[92mINFO\033[0m: Validation samples: {len(val_dataset)}")
+    print(f"\033[92mINFO\033[0m: Test samples: {len(test_dataset)}")
+    print(f"\033[92mINFO\033[0m: Batch size: {batch_size}")
+
+    # 训练循环
+    for epoch in range(epochs):
+        print(f"\033[92mINFO\033[0m: Training epoch ({epoch+1}/{epochs})")
+
+        model.train()
+        running_loss = 0.0
+        try:
+            for mfcc, image, label in train_loader:
+                mfcc, image, label = mfcc.to(device), image.to(device), label.to(device)
+
+                optimizer.zero_grad()
+                output = model(mfcc, image)
+                label = label.view(-1, 1).float()
+                loss = criterion(output, label)
+                loss.backward()
+                optimizer.step()
+
+                running_loss += loss.item()
+                writer.add_scalar("Training Loss", loss.item(), global_step)
+                global_step += 1
+        except Exception as e:
+            print(f"\033[91mERR!\033[0m: {e}")
+
+        # 验证阶段
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            try:
+                for mfcc, image, label in val_loader:
+                    mfcc, image, label = (
+                        mfcc.to(device),
+                        image.to(device),
+                        label.to(device),
+                    )
+                    output = model(mfcc, image)
+                    loss = criterion(output, label.view(-1, 1))
+                    val_loss += loss.item()
+            except Exception as e:
+                print(f"\033[91mERR!\033[0m: {e}")
+
+        # 记录验证损失
+        writer.add_scalar("Validation Loss", val_loss / len(val_loader), epoch)
+
+        print(
+            f"Epoch [{epoch+1}/{epochs}], Training Loss: {running_loss/len(train_loader):.4f}, "
+            f"Validation Loss: {val_loss/len(val_loader):.4f}"
+        )
+
+        # 保存模型检查点
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        model_path = f"models/model_{epoch+1}_{timestamp}.pt"
+        torch.save(model.state_dict(), model_path)
+
+        print(
+            f"\033[92mINFO\033[0m: Model checkpoint epoch [{epoch+1}/{epochs}] saved: {model_path}"
+        )
+
+    print(f"\033[92mINFO\033[0m: Training complete")
+
+
+if __name__ == "__main__":
+    train_model()
