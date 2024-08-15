@@ -45,10 +45,10 @@ cleaned
 
 ### Do Preprocessing
 
-Run [`preprocess.py`](preprocess.py) to avoid duplicated preprocessing is useful to accelerate training.
+Run [`preprocess_file.py`](preprocess_file.py) to avoid duplicated preprocessing is useful to accelerate training.
 
 ```bash
-python preprocess.py --data_dir /path/to/cleaned --save_dir /path/to/processed
+python preprocess_file.py --data_dir /path/to/cleaned --save_dir /path/to/processed
 ```
 
 Preprocessing includes:
@@ -67,3 +67,5 @@ Run [`train.py`](train.py) to train the model.
 ```bash
 python train.py
 ```
+
+### Web App Inference with Gradio
