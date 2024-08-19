@@ -5,8 +5,6 @@ import torch, torchaudio, torchvision
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from preprocess import image_preprocessing, audio_preprocessing
-
 # 打印库的版本信息
 print(f"\033[92mINFO\033[0m: PyTorch version: {torch.__version__}")
 print(f"\033[92mINFO\033[0m: Torchaudio version: {torchaudio.__version__}")

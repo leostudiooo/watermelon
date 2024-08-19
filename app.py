@@ -1,12 +1,14 @@
 import torch, torchaudio, torchvision
 import os
 import gradio as gr
+import numpy as np
 
-from preprocess import image_preprocessing, audio_preprocessing
+from preprocess import process_audio_data, process_image_data
 from train import WatermelonModel
 from infer import infer
 
 def load_model(model_path):
+    global device
     device = torch.device(
         "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     )
@@ -28,8 +30,13 @@ if __name__ == "__main__":
     model = load_model(args.model_path)
 
     def predict(audio, image):
-        mfcc = audio_preprocessing(audio)
-        img = image_preprocessing(image)
+        audio, sr = audio[-1], audio[0]
+        audio = np.transpose(audio)
+        audio = torch.tensor(audio).float()
+        mfcc = process_audio_data(audio, sr).to(device)
+        img = torch.tensor(image).float()
+        img = process_image_data(img).to(device)
+        
         if mfcc is not None and img is not None:
             sweetness = infer(mfcc, img)
             return sweetness.item()

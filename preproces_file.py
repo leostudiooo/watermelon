@@ -5,7 +5,7 @@ import torchaudio
 import torchvision
 from torch.utils.data import Dataset
 from concurrent.futures import ThreadPoolExecutor
-from preprocess import process_audio_data, process_image_data
+from preprocess import process_audio_data, process_image_data, resample_rate
 
 class PreprocessedDataset(Dataset):
     def __init__(self, data_dir):

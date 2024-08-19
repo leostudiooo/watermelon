@@ -1,23 +1,20 @@
-import torch
+import torch, torchaudio
 import argparse
-from preprocess import audio_preprocessing, image_preprocessing
+from preprocess import process_audio_data, process_image_data
 from train import WatermelonModel
 
 
-def infer(audio_path, image_path, model, device):
+def infer(audio, image, model, device):
     # Load and preprocess the input data
-    processed_audio = audio_preprocessing([audio_path]).unsqueeze(0).to(device)
-    processed_image = image_preprocessing([image_path]).unsqueeze(0).to(device)
-
-    # Set model to evaluation mode
-    model.eval()
-
+    audio, sr = torchaudio.load(audio)
+    mfcc = process_audio_data(audio, sr).to(device)
+    img = process_image_data(image).to(device)
+    if mfcc is None or img is None:
+        return None
+    
+    # Run inference
     with torch.no_grad():
-        # Infer the sweetness using the model
-        output = model(processed_audio, processed_image)
-
-    # Decode the output (assuming the output is a direct prediction of sweetness)
-    predicted_sweetness = output.item()
+        predicted_sweetness = model(mfcc, img).item()
 
     return predicted_sweetness
 
