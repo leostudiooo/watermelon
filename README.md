@@ -69,3 +69,5 @@ python train.py
 ```
 
 ### Web App Inference with Gradio
+
+<img width="1376" alt="image" src="https://github.com/user-attachments/assets/d62c3ddd-f120-40fb-a728-942f6b86b5ac" />
